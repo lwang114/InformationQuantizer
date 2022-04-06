@@ -1,7 +1,7 @@
-# InformationQuantizer
+# Information Quantizer
 <div align="left"><img src="doc/image/iq.png" width="800"/></div>
 
-This repository contains the code for the paper ``Self-supervised Semantic-driven Phoneme Discovery for Zero-resource Speech Recognition'' (under construction).
+This repository contains the code for the paper ``Self-supervised Semantic-driven Phoneme Discovery for Zero-resource Speech Recognition'' (more features available soon).
 ```
 @inproceedings{wang-etal-2022-iq,
   author={Liming Wang and Siyuan Feng and Mark Hasegawa-Johnson and Chang D. Yoo},
@@ -18,6 +18,6 @@ This repository contains the code for the paper ``Self-supervised Semantic-drive
 - Other dependencies can be found in ```requirements.txt```
 
 ### How to run it?
-0. Prepare datasets. Download the [LibriSpeech]() dataset and manually cut out spoken word segments using information provided in resources/librispeech_word/librispeech_word.json. 
-2. Modify the paths and variables in ```run.sh``` and configs/librispeech_word.conf 
-3. Run ```bash run.sh```
+0. Prepare datasets. Download the [LibriSpeech](https://www.openslr.org/12) dataset and manually cut out spoken word segments using information provided in resources/librispeech_word/librispeech_word.json. 
+1. Modify the paths and variables in ```run.sh``` and configs/librispeech_word.conf 
+2. Run ```bash run.sh```
