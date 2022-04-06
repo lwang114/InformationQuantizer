@@ -1,5 +1,5 @@
 # Information Quantizer
-<div align="left"><img src="doc/image/iq.png" width="800"/></div>
+<div align="left"><img src="doc/image/fig29.png" width="800"/></div>
 
 This repository contains the code for the paper ``Self-supervised Semantic-driven Phoneme Discovery for Zero-resource Speech Recognition'' (more features available soon).
 ```
