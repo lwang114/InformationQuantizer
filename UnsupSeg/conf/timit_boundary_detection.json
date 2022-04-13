@@ -1,0 +1,13 @@
+{
+  "debug": false,
+  "vad": false,
+  "splits": {"train": ["train"],
+             "test": ["test_subset"]},
+  "metadata_path": "/ws/ifp-53_2/hasegawa/lwang114/spring2022/InformationQuantizer/resources/TIMIT/test_subset/test_subset.json", 
+  "data_path": "/ws/ifp-53_2/hasegawa/lwang114/spring2022/InformationQuantizer/resources/TIMIT",
+  "batch_size": 32,
+  "use_segment": false,
+  "vad": false,
+  "ckpt": "/ws/ifp-53_2/hasegawa/lwang114/spring2021/DiscoPhoneInfoBottleneck/UnsupSeg/pretrained_models/timit_pretrained.ckpt",
+  "out_path": "/ws/ifp-53_2/hasegawa/lwang114/spring2022/InformationQuantizer/UnsupSeg/checkpoints/timit"
+}

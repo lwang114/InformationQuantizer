@@ -1,0 +1,13 @@
+{
+  "seeds": [1234],
+  "debug": false,
+  "splits": {"train": ["train-clean-100"],
+             "test": ["train-clean-100", "dev-clean"]},
+  "data_path": "/ws/ifp-53_2/hasegawa/lwang114/spring2022/InformationQuantizer/resources/librispeech_word",
+  "metadata_path": "/ws/ifp-53_2/hasegawa/lwang114/spring2022/InformationQuantizer/resources/librispeech_word/librispeech_word.json",
+  "batch_size": 32,
+  "use_segment": false,
+  "vad": false,
+  "ckpt": "/ws/ifp-53_2/hasegawa/lwang114/spring2021/DiscoPhoneInfoBottleneck/UnsupSeg/pretrained_models/timit_pretrained.ckpt",
+  "out_path": "/ws/ifp-53_2/hasegawa/lwang114/spring2022/InformationQuantizer/UnsupSeg/checkpoints/librispeech_word"
+}
