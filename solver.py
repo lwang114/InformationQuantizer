@@ -181,7 +181,8 @@ class Solver(object):
       self.global_epoch += 1
       pred_phone_labels = []
       gold_phone_labels = []
-      for idx, batch in tqdm(enumerate(self.data_loader['train'])):
+      progress = tqdm(ncols=80, total=len(self.data_loader['train']))
+      for idx, batch in enumerate(self.data_loader['train']):
         if idx > 2 and self.debug:
           break
         self.global_iter += 1
@@ -246,7 +247,9 @@ class Solver(object):
           avg_loss = total_loss / total_step
           avg_phone_loss = total_phone_loss / total_step
           # print(f'Itr {self.global_iter:d}\tAvg Loss (Total Loss):{avg_loss:.2f} ({total_loss:.2f})\tAvg Phone Loss:{avg_phone_loss:.2f}')
-      
+        progress.update(1)
+      progress.close()
+         
       avg_loss = total_loss / total_step
       avg_phone_loss = total_phone_loss / total_step
       print(f'Epoch {self.global_epoch}\tTraining Loss: {avg_loss:.3f}\tTraining Phone Loss: {avg_phone_loss:.3f}')
@@ -281,7 +284,8 @@ class Solver(object):
 
     with torch.no_grad():
       B = 0
-      for b_idx, batch in tqdm(enumerate(self.data_loader['test'])):        
+      progress = tqdm(ncols=80, total=len(self.data_loader['test']))
+      for b_idx, batch in enumerate(self.data_loader['test']): 
         if b_idx > 2 and self.debug:
           break
         audios = batch[0]
@@ -375,13 +379,15 @@ class Solver(object):
                                 f'Gold word label: {gold_word_name}\n'
                                 f'Pred word label: {pred_word_name}\n'
                                 f'Pred word label by quantizer: {pred_word_name_quantized}\n\n') 
+        progress.update(1)
+      progress.close()
       phone_f.close()
       word_readable_f.close()
       if save_embedding:
         np.savez(embed_file, **embeds)
         json.dump(embed_labels, open(embed_label_file, 'w'), indent=2)
       avg_loss = total_loss / total_step
-      np.savez(embed_file, **embeds) 
+      np.savez(embed_file, **embeds)
  
       # Compute word accuracy and word token F1
       print('[TEST RESULT]')
@@ -437,17 +443,14 @@ class Solver(object):
     embed_file = self.ckpt_dir.joinpath(f'{self.oos_dataset_name}_{splits}_embeddings.npz')
     embed_label_file = self.ckpt_dir.joinpath(f'{self.oos_dataset_name}_{splits}_embedding_labels.json')
     split = testset.splits[0]
-    embed_zrc_dir = self.ckpt_dir.joinpath(f'outputs_{self.oos_dataset_name}_{self.embed_type}/phonetic/{splits}')
-    if not os.path.exists(embed_zrc_dir):
-      print(f'Create directory for embeddings: {embed_zrc_dir}')
-      os.makedirs(embed_zrc_dir)
-    
+        
     embeds = dict()
     embed_labels = dict()
 
     phone_f = open(phone_file, 'w')
     with torch.no_grad():
-      for b_idx, batch in tqdm(enumerate(test_loader)):
+      progress = tqdm(ncols=80, total=len(test_loader))
+      for b_idx, batch in enumerate(test_loader):
         audios = batch[0]
         input_mask = batch[3]
         
@@ -466,13 +469,9 @@ class Solver(object):
           
           if save_embedding:
             embed_id = f'{audio_id}_{global_idx}' 
-            # XXX embeds[embed_id] = embedding.detach().cpu().numpy()
+            embeds[embed_id] = embedding.detach().cpu().numpy()
             embed_labels[embed_id] = {'phoneme_text': [s['text'] for s in phonemes],
                                       'word_text': [NULL]*len(phonemes)}
-            embedding_frame = testset.unsegment(embedding, phonemes)
-            embed_path = embed_zrc_dir.joinpath(f'{audio_id}.ark.gz')
-            with WriteHelper(f'ark:| gzip -c > {embed_path}') as writer:
-              writer('arr_0', embedding_frame.detach().cpu().numpy())
 
           nframes = int(round(phonemes[-1]['end'] * 100, 3))
           pred_phone_label = phone_indices[idx, :nframes]
@@ -487,6 +486,8 @@ class Solver(object):
           pred_phone_label_list = pred_phone_label.cpu().detach().numpy().tolist()
           pred_phone_names = ','.join([str(phn_idx) for phn_idx in pred_phone_label_list])
           phone_f.write(f'{audio_id} {pred_phone_names}\n')
+        progress.update(1)
+      progress.close()
       phone_f.close()
 
       # Save embeddings

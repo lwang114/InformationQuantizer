@@ -200,7 +200,6 @@ class SpokenWordDataset(torch.utils.data.Dataset):
         sfeat : (max num. of segments, feature dim.)
         mask : (max num. of segments,)
     """
-    feat = feat
     sfeats = []
 
     word_begin = segments[0]["begin"]
@@ -231,7 +230,6 @@ class SpokenWordDataset(torch.utils.data.Dataset):
       mask = torch.zeros(len(feat), len(sfeats))
     else:
       mask = torch.ones(len(sfeats))
-
     return sfeat, mask
     
   def unsegment(self, sfeat, segments):
@@ -261,10 +259,6 @@ class SpokenWordDataset(torch.utils.data.Dataset):
       else:
         feat[begin:end+1] = sfeat[i]
     return feat.squeeze(-1)
-
-  def update_segment(self, idx, new_segments):
-    self.dataset[idx][2] = None
-    self.dataset[idx][2] = [{k:v for k,v in s.items()} for s in new_segments]
 
   def __getitem__(self, idx):
     audio_file, label, phoneme_dicts, _ = self.dataset[idx]
@@ -302,23 +296,6 @@ class SpokenWordDataset(torch.utils.data.Dataset):
            phone_mask,\
            word_mask,\
            idx
-
-  def sample_positives(self, idx, label, n):
-    random_idxs = np.random.permutation(self.class_to_indices[label])
-    pos_idxs = []
-    for i in random_idxs:
-      if i == idx:
-        continue
-      pos_idxs.append(i)
-      if len(pos_idxs) == n:
-        break
-    if not len(pos_idxs):
-      print(f'No positive examples found for class {self.dataset[idx][1]}')
-      return [idx]*n
-        
-    if len(pos_idxs) < n:
-      return pos_idxs+[pos_idxs[-1]]*(n-len(pos_idxs))
-    return pos_idxs
 
   def __len__(self):
     return len(self.dataset)

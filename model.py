@@ -626,3 +626,40 @@ class GumbelBLSTM(nn.Module):
 
   def weight_init(self):
       pass
+
+def masked_kl_div(input, target, mask,
+                  log_input=False,
+                  reduction="mean"):
+  EPS = 1e-10
+  # (B, *, D)
+  if log_input:
+    KL = torch.exp(target) * (target - input)
+  else:
+    KL = torch.exp(target) * (target - torch.log(input))
+
+  if not reduction:
+    return KL.sum(-1)
+
+  if mask is not None:
+    loss = (KL.sum(-1) * mask).mean(0).sum()
+  else:
+    loss = KL.mean(0).sum()
+
+  return loss  
+
+def masked_js_div(input, target, mask,
+                  log_input=False,
+                  reduction="mean"):
+  if log_input:
+    m = (torch.exp(input) + torch.exp(target)) / 2.
+  else:
+    m = (input + torch.exp(target)) / 2.
+  loss = masked_kl_div(m, target, mask, reduction=reduction)\
+         + masked_kl_div(m, input, mask, reduction=reduction)
+  return loss
+
+def xavier_init(ms):
+    for m in ms :
+        if isinstance(m, nn.Linear) or isinstance(m, nn.Conv2d):
+            nn.init.xavier_uniform(m.weight,gain=nn.init.calculate_gain('relu'))
+            m.bias.data.zero_()

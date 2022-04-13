@@ -3,7 +3,7 @@ from torch.utils.data import DataLoader
 from torchvision import transforms
 from torchvision.datasets import MNIST
 from datasets.flickr8k_word_image import FlickrWordImageDataset, FlickrWordImagePreprocessor
-from datasets.librispeech import LibriSpeechDataset, LibriSpeechPreprocessor
+from datasets.librispeech import LibriSpeechDataset, LibriSpeechPreprocessor, collate_fn_librispeech
 from datasets.spoken_word_dataset import SpokenWordDataset, SpokenWordPreprocessor, collate_fn_spoken_word
 
 class UnknownDatasetError(Exception):
@@ -73,6 +73,7 @@ def return_data(args):
                          phone_label=args.phone_label,
                          use_segment=args.use_segment,
                          debug=args.debug) 
+        collate_fn = collate_fn_librispeech
     else:
         preprocessor = SpokenWordPreprocessor(
                          args.dataset, 
