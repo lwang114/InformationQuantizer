@@ -194,9 +194,6 @@ class LibriSpeechDataset(torch.utils.data.Dataset):
       if self.audio_feature in ["cpc", "cpc_big", "mfcc", "fbank", "bnf", "bnf+cpc"]:
         begin = int(round(begin_sec * 100, 3)) 
         end = int(round(end_sec * 100, 3))
-        if begin >= self.max_feat_len:
-          continue
-
         if begin != end:
           sfeat = feat[begin:end]
         else:

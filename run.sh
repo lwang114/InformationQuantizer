@@ -3,8 +3,8 @@ source ~/anaconda3/etc/profile.d/conda.sh
 conda activate zerospeech2021_baseline
 
 gpu_num=3
-stage=-1
-stop_stage=-1
+stage=4
+stop_stage=4
 
 iq_root=/ws/ifp-53_2/hasegawa/lwang114/spring2022/InformationQuantizer ###-------> Change this 
 data_root=${iq_root}/resources

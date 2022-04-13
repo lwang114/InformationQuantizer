@@ -157,11 +157,7 @@ class SpokenWordDataset(torch.utils.data.Dataset):
     self.audio_feature_type = audio_feature
 
   def load_audio(self, audio_file):
-    if self.audio_feature_type in ["mfcc", "bnf+mfcc"]:
-      audio, _ = torchaudio.load(audio_file)
-      inputs = self.audio_transforms(audio)
-      inputs = inputs.squeeze(0).t()
-    elif self.audio_feature_type in ["cpc", "cpc_big"]:
+    if self.audio_feature_type in ["cpc", "cpc_big"]:
       if audio_file.split('.')[-1] == "txt":
         audio = np.loadtxt(audio_file)
       else:
@@ -185,7 +181,6 @@ class SpokenWordDataset(torch.utils.data.Dataset):
       audio, _ = torchaudio.load(audio_file)
       inputs = audio.squeeze(0)
     else: Exception(f"Audio feature type {self.audio_feature_type} not supported")
-
     input_mask = torch.ones(inputs.size(0))
     return inputs, input_mask
 
@@ -201,8 +196,8 @@ class SpokenWordDataset(torch.utils.data.Dataset):
         mask : (max num. of segments,)
     """
     sfeats = []
-
     word_begin = segments[0]["begin"]
+    dur = segments[-1]["end"] - segments[0]["begin"]
     for i, segment in enumerate(segments):
       if segment["text"] == SIL:
         continue
@@ -267,15 +262,6 @@ class SpokenWordDataset(torch.utils.data.Dataset):
       audio_inputs, input_mask = self.segment(audio_inputs, 
                                               phoneme_dicts,
                                               method=self.ds_method)
-    if self.n_positives > 0: # Draw positive examples
-      audio_inputs = [audio_inputs]
-      input_mask = [input_mask]
-      pos_idxs = self.sample_positives(idx, label, self.n_positives)
-      for pos_idx in pos_idxs:
-        outputs = self.load_audio(self.dataset[pos_idx][0])
-        audio_inputs.append(outputs[0].clone())
-        input_mask.append(outputs[1].clone())
-
     phonemes = [phn_dict["text"] for phn_dict in phoneme_dicts]
     
     word_labels = self.preprocessor.to_word_index([label])
