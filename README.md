@@ -19,6 +19,7 @@ This repository contains the code for the paper ``Self-supervised Semantic-drive
 
 ### How to run it?
 Simply run ```bash run.sh``` for the small datasets we provided. To reproduce the results in the paper, please download the whole datasets and convert them in a similar format as the small datasets by the following steps:
+
 0. Prepare datasets. Download the [LibriSpeech](https://www.openslr.org/12) dataset, manually cut out spoken word segments using information provided in resources/librispeech_word/librispeech_word.json. Also download the TIMIT dataset, convert the audio files to .wav and create the meta data files as done in ```resources/TIMIT/test_subset```.
 1. Modify the paths and variables in ```run.sh``` and configs/librispeech_word.conf. 
 2. Run ```bash run.sh```. 
