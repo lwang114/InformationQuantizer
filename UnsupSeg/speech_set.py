@@ -43,7 +43,7 @@ class SpeechSet(Dataset):
           metadata_path = [metadata_path for _ in self.splits[split]]
 
         for sp, path in zip(self.splits[split], metadata_path):
-          examples = load_data_split(data_path, sp, path, debug=debug)
+          examples, self.is_word_dataset = load_data_split(data_path, sp, path, debug=debug)
           data.extend(examples)
           print(f'Number of {sp} audio files = {len(examples)}')
         self.data = data
@@ -113,7 +113,9 @@ def load_data_split(data_path, sp, metadata_path, debug=False):
         else:
           audio_id = sent_dict['utterance_id']
 
+        is_word_dataset = False 
         if 'word_id' in sent_dict:
+          is_word_dataset = True
           word_id = sent_dict['word_id']
           audio_id = f'{audio_id}_{word_id}'
           phns = sent_dict['phonemes']
@@ -130,9 +132,11 @@ def load_data_split(data_path, sp, metadata_path, debug=False):
         for phn_idx, phn in enumerate(phns):
           if phn_idx == 0 and phn['begin'] != 0:
             segments[audio_id].append(phn['begin'])
-          segments[audio_id].append(phn['end'])
           # XXX if phn['text'] != SIL:
           phonemes[audio_id].append([phn['begin'], phn['end']])
+          if phn_idx == len(phns) - 1 and is_word_dataset: # Exclude the end boundary if a spoken word dataset is used
+            continue
+          segments[audio_id].append(phn['end'])
 
     for wav_file in os.listdir(os.path.join(data_path, sp)):
       if wav_file.split('.')[-1] != 'wav':
@@ -144,4 +148,4 @@ def load_data_split(data_path, sp, metadata_path, debug=False):
       segs = deepcopy(segments[audio_id])
       phns = deepcopy(phonemes[audio_id])
       examples.append([os.path.join(data_path, sp, wav_file), segs, phns])
-    return examples
+    return examples, is_word_dataset

@@ -59,6 +59,10 @@ def main(data_loader, ckpt, out_path, debug=False, vad=False):
 
       sr = 16000
       for idx, peak in enumerate(peaks):
+        if data_loader.dataset.is_word_dataset:
+          peak = np.append([0], peak)
+          peak = np.append(peak, [int(phonemes[idx][-1][1])])
+          segments[idx] = [0]+segments[idx]+[int(phonemes[idx][-1][1])]
         audio_len = len(torchaudio.load(fnames[idx])[0][0])
         spectral_len = spectral_size(audio_len)
         len_ratio = audio_len / spectral_len
