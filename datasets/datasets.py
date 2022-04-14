@@ -62,6 +62,7 @@ def return_data(args):
                          audio_feature=args.audio_feature,
                          phone_label=args.phone_label,
                          use_segment=args.use_segment,
+                         n_overlap=args.get('n_overlap', 0),
                          debug=args.debug) 
         test_data = LibriSpeechDataset(
                          dset_dir, 
@@ -72,6 +73,7 @@ def return_data(args):
                          audio_feature=args.audio_feature,
                          phone_label=args.phone_label,
                          use_segment=args.use_segment,
+                         n_overlap=args.get('n_overlap', 0),
                          debug=args.debug) 
         collate_fn = collate_fn_librispeech
     else:
@@ -93,7 +95,7 @@ def return_data(args):
                          audio_feature=args.audio_feature,
                          phone_label=args.phone_label,
                          ds_method=args.downsample_method,
-                         n_positives=args.get('n_positives', 0),
+                         n_overlap=args.get('n_overlap', 0),
                          debug=args.debug)
         test_data = SpokenWordDataset(
                          dset_dir,
@@ -104,7 +106,7 @@ def return_data(args):
                          audio_feature=args.audio_feature,
                          phone_label=args.phone_label,
                          ds_method=args.downsample_method,
-                         n_positives=args.get('n_positives', 0),
+                         n_overlap=args.get('n_overlap', 0),
                          debug=args.debug)
         collate_fn = collate_fn_spoken_word
 

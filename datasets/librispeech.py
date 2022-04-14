@@ -100,7 +100,6 @@ def collate_fn_librispeech(batch):
 
 class LibriSpeechDataset(torch.utils.data.Dataset):
   
-  
   def __init__(
       self, data_path,
       preprocessor, split,
@@ -114,6 +113,7 @@ class LibriSpeechDataset(torch.utils.data.Dataset):
       image_feature="image",
       phone_label="predicted",
       sample_rate=16000,
+      n_overlap=0,
       debug=False
   ):
     self.preprocessor = preprocessor
@@ -121,7 +121,8 @@ class LibriSpeechDataset(torch.utils.data.Dataset):
     self.data_path = data_path
     self.phone_label = phone_label
     self.use_segment = use_segment
-   
+    self.n_overlap = n_overlap
+
     data = [] 
     for sp in self.splits:
       # Load data paths to audio and visual features
@@ -194,6 +195,9 @@ class LibriSpeechDataset(torch.utils.data.Dataset):
       if self.audio_feature in ["cpc", "cpc_big", "mfcc", "fbank", "bnf", "bnf+cpc"]:
         begin = int(round(begin_sec * 100, 3)) 
         end = int(round(end_sec * 100, 3))
+        if self.n_overlap > 0:
+          begin = max(begin - self.n_overlap, 0)
+          end = max(end + self.n_overlap, feat.size(0))
         if begin != end:
           sfeat = feat[begin:end]
         else:
@@ -500,6 +504,7 @@ def load_data_split(data_path, sp,
                  "phonemes": phonemes}
       examples.append(example)
     else:
+      print(audio_path) # XXX
       absent_utt_ids.append(utt_id)
   
   if len(absent_utt_ids) > 0:

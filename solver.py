@@ -12,7 +12,7 @@ import json
 import time
 import numpy as np
 import argparse
-import datetime
+from datetime import datetime
 from kaldiio import WriteHelper
 from copy import deepcopy
 from pyhocon import ConfigFactory
@@ -587,13 +587,16 @@ def main(argv):
         config['ckpt_dir'] = 'checkpoints/debug'
     else:
         config['ckpt_dir'] = os.path.join(
-            'checkpoints', datetime.now().strftime('%m_%d_%y/%h_%M_%s')
-        ) 
+            'checkpoints', datetime.now().strftime('%m_%d_%Y/%H_%M_%S')
+        )
 
   word_accs = []
   token_precs = []
   token_recs = []
   token_f1s = []
+  oos_token_precs = []
+  oos_token_recs = []
+  oos_token_f1s = []
   for seed in config.get('seeds', [config.seed]):
     config.seed = seed
     config['seed'] = seed
@@ -609,6 +612,7 @@ def main(argv):
     print(config)
     print()
 
+
     net = Solver(config)
     save_embedding = config.get('save_embedding', False)
     if config.mode == 'train':
@@ -623,20 +627,32 @@ def main(argv):
     token_precs.append(net.history['token_result'][0])
     token_recs.append(net.history['token_result'][1])
     token_f1s.append(net.history['token_result'][2])
+    oos_token_precs.append(net.history['oos_token_result'][0])
+    oos_token_recs.append(net.history['oos_token_result'][1])
+    oos_token_f1s.append(net.history['oos_token_result'][2])
 
   word_accs = np.asarray(word_accs)
   token_precs = np.asarray(token_precs)
   token_recs = np.asarray(token_recs)
   token_f1s = np.asarray(token_f1s)
+  oos_token_precs = np.asarray(oos_token_precs)
+  oos_token_recs = np.asarray(oos_token_recs)
+  oos_token_f1s = np.asarray(oos_token_f1s)
 
   mean_word_acc, std_word_acc = np.mean(word_accs), np.std(word_accs)
   mean_token_prec, std_token_prec = np.mean(token_precs), np.std(token_precs)
   mean_token_rec, std_token_rec = np.mean(token_recs), np.std(token_recs)
-  mean_token_f1, std_token_f1 = np.mean(token_f1s), np.std(token_f1s) 
+  mean_token_f1, std_token_f1 = np.mean(token_f1s), np.std(token_f1s)
+  mean_oos_token_prec, std_oos_token_prec = np.mean(oos_token_precs) 
+  mean_oos_token_rec, std_oos_token_rec = np.mean(oos_token_recs) 
+  mean_oos_token_f1s, std_oos_token_f1s = np.mean(oos_token_f1s) 
   print(f'Average Word Acc.: {mean_word_acc:.4f}+/-{std_word_acc:.4f}\n'
         f'Average Token Precision: {mean_token_prec:.4f}+/-{std_token_prec:.4f}\t'
         f'Recall: {mean_token_rec:.4f}+/-{std_token_rec:.4f}\t'
-        f'F1: {mean_token_f1:.4f}+/-{std_token_f1:.4f}') 
+        f'F1: {mean_token_f1:.4f}+/-{std_token_f1:.4f}\n'
+        f'Average OOS Token Precision: {mean_oos_token_prec:.4f}+/-{std_oos_token_prec:.4f}\t'
+        f'Recall: {mean_oos_token_rec:.4f}+/-{std_oos_token_prec:.4f}\t'
+        f'F1: {mean_oos_token_f1:.4f}+/-{std_oos_token_f1:.4f}') 
 
 if __name__ == '__main__':
   argv = sys.argv[1:]

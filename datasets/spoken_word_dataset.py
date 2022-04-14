@@ -99,7 +99,7 @@ class SpokenWordDataset(torch.utils.data.Dataset):
       ds_method="average",
       sample_rate=16000,
       min_class_size=50,
-      n_positives=0,
+      n_overlap=0,
       debug=False
   ):
     self.preprocessor = preprocessor
@@ -111,7 +111,7 @@ class SpokenWordDataset(torch.utils.data.Dataset):
     self.use_segment = use_segment
     self.ds_method = ds_method
     self.sample_rate = sample_rate
-    self.n_positives = n_positives
+    self.n_overlap = n_overlap
     self.debug = debug
     
     data = []
@@ -204,19 +204,17 @@ class SpokenWordDataset(torch.utils.data.Dataset):
       phn = segment["text"]
       begin = int(round((segment["begin"]-word_begin)*100, 3))
       end = int(round((segment["end"]-word_begin)*100, 3))
+      if self.n_overlap > 0:
+        begin = max(begin - self.n_overlap, 0)
+        end = max(end + self.n_overlap, feat.size(0))
       dur = max(end - begin, 1)
-      if method == "sample":
-        end = min(max(begin+1, end), feat.size(0)) 
-        t = torch.randint(begin, end, (1,)).squeeze(0)
-        segment_feat = feat[t]
+      if begin >= feat.size(0):
+        print(f'Warning: ({phn}, {begin}, {end}) begin idx {begin} >= feature size {feat.size(0)}')
+        segment_feat = feat[-1]
+      elif begin != end:
+        segment_feat = embed(feat[begin:end], method=method)
       else:
-        if begin >= feat.size(0):
-          print(f'Warning: ({phn}, {begin}, {end}) begin idx {begin} >= feature size {feat.size(0)}')
-          segment_feat = feat[-1]
-        elif begin != end:
-          segment_feat = embed(feat[begin:end], method=method)
-        else:
-          segment_feat = embed(feat[begin:end+1], method=method)
+        segment_feat = embed(feat[begin:end+1], method=method)
       if torch.any(torch.isnan(segment_feat)):
         print(f'Bad segment feature for feature of size {feat.size()}, begin {begin}, end {end}')
       sfeats.append(segment_feat)
@@ -445,12 +443,9 @@ def load_data_split(dataset_name,
         label_counts[label] += 1
       if label_counts[label] > max_keep_size:
         continue
-
-      if word["split"] != split:
-        continue
       
-      audio_id = word["audio_id"]
       audio_path = None
+      audio_id = word["audio_id"]
       word_id = word['word_id']
       if audio_feature in ["mfcc", "vq-wav2vec", "wav2vec2", "wav2vec"]:
         audio_path = os.path.join(data_path, split, f"{audio_id}_{word_id}.wav")
@@ -472,12 +467,13 @@ def load_data_split(dataset_name,
       else: Exception(f"Audio feature type {audio_feature} not supported")
 
       true_phonemes = word["phonemes"]
+
       if "children" in true_phonemes:
         true_phonemes = [phn for phn in true_phonemes["children"] if phn["text"] != SIL]
         if len(true_phonemes) == 0:
           continue
                  
-      for phn_idx in range(len(true_phonemes)):
+      for phn_idx in range(len(true_phonemes)): # In Mboshi, each phoneme is written as ``phoneme{index}''
         if not "phoneme" in true_phonemes[phn_idx]["text"]:
           true_phonemes[phn_idx]["text"] = re.sub(r"[0-9]", "", true_phonemes[phn_idx]["text"]) 
 
