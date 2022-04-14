@@ -176,7 +176,7 @@ class Solver(object):
     total_phone_loss = 0.
         
     for e in range(self.epoch):
-      if e > 0 and self.debug:
+      if e > 1 and self.debug:
         break
       self.global_epoch += 1
       pred_phone_labels = []
@@ -643,9 +643,9 @@ def main(argv):
   mean_token_prec, std_token_prec = np.mean(token_precs), np.std(token_precs)
   mean_token_rec, std_token_rec = np.mean(token_recs), np.std(token_recs)
   mean_token_f1, std_token_f1 = np.mean(token_f1s), np.std(token_f1s)
-  mean_oos_token_prec, std_oos_token_prec = np.mean(oos_token_precs) 
-  mean_oos_token_rec, std_oos_token_rec = np.mean(oos_token_recs) 
-  mean_oos_token_f1s, std_oos_token_f1s = np.mean(oos_token_f1s) 
+  mean_oos_token_prec, std_oos_token_prec = np.mean(oos_token_precs), np.std(oos_token_precs) 
+  mean_oos_token_rec, std_oos_token_rec = np.mean(oos_token_recs), np.std(oos_token_recs)
+  mean_oos_token_f1, std_oos_token_f1 = np.mean(oos_token_f1s), np.std(oos_token_f1s) 
   print(f'Average Word Acc.: {mean_word_acc:.4f}+/-{std_word_acc:.4f}\n'
         f'Average Token Precision: {mean_token_prec:.4f}+/-{std_token_prec:.4f}\t'
         f'Recall: {mean_token_rec:.4f}+/-{std_token_rec:.4f}\t'
